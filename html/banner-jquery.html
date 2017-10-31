@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>图片轮播 js原生(左右切换)</title>
+    <style type="text/css">
+        body,div,ul,li,a,img{margin: 0;padding: 0;}
+        ul,li{list-style: none;}
+        a{text-decoration: none;}
+
+        #wrapper{position: relative;margin: 30px auto;width: 100%;height: 200px;}
+        #banner{position:relative;width: 100%;height: 200px;overflow: hidden;}
+        .imgList{position:relative; white-space:nowrap; height:200px;z-index: 10;overflow: hidden; transition:all  1s  linear;}
+        .imgList li{float:left; }
+        #prev,
+        #next{position: absolute;top:80px; width:20px;;height:20px; border:3px solid #ddd; border-radius:50%; background-color:#fff; text-align:center; line-height:20px; z-index: 20;cursor: pointer;opacity: 0.2;filter:alpha(opacity=20);}
+        #prev{left: 10px;}
+        #next{right: 10px;}
+        #prev:hover,
+        #next:hover{opacity: 0.5;filter:alpha(opacity=50);}
+        .bg{position: absolute;bottom: 0;width: 100%;height: 40px;z-index:20;opacity: 0.4;filter:alpha(opacity=40);background: black;}
+        .img-info-li{position: absolute;left: 10px;bottom: 10px;z-index: 30; color:#fff;  }
+        .infoList li{display: none;}
+        .infoList .infoOn{display: inline;color: white;}
+        .indexList{position: absolute;right: 10px;bottom: 5px;z-index: 30;}
+        .indexList li{float: left; width:20px; height:20px; border-radius:50%; text-align:center; line-height:20px; margin:3px; background: grey;cursor: pointer;}
+        .indexList .indexOn{background: red;font-weight: bold;color: white;}
+    </style>
+</head>
+<body>
+<div id="wrapper"><!-- 最外层部分 -->
+    <div id="banner"><!-- 轮播部分 -->
+        <ul class="imgList"><!-- 图片部分 -->
+            <li class="img-li"><a href="#"><img class="banner-img" src="../images/img1.jpg" width="100%" height="200px" alt="相关1"></a></li>
+            <li class="img-li"><a href="#"><img class="banner-img" src="../images/img2.jpg" width="100%" height="200px" alt="相关2"></a></li>
+            <li class="img-li"><a href="#"><img class="banner-img" src="../images/img3.jpg" width="100%" height="200px" alt="相关3"></a></li>
+            <li class="img-li"><a href="#"><img class="banner-img" src="../images/img4.jpg" width="100%" height="200px" alt="相关4"></a></li>
+            <li class="img-li"><a href="#"><img class="banner-img" src="../images/img5.jpg" width="100%" height="200px" alt="相关5"></a></li>
+        </ul>
+        <div id="prev">&lt;</div>
+        <div id="next">&gt;</div>
+        <div class="bg"></div> <!-- 图片底部背景层部分-->
+        <div class="img-info-li infoOn">相关1</div>
+        <ul class="indexList"><!-- 图片右下角序号部分 -->
+            <li class="indexLi indexOn">1</li>
+            <li class="indexLi">2</li>
+            <li class="indexLi">3</li>
+            <li class="indexLi">4</li>
+            <li class="indexLi">5</li>
+        </ul>
+    </div>
+</div>
+<button id="btn">按钮</button>
+<script type="text/javascript">
+
+    var imgList = document.getElementsByClassName("imgList")[0];
+    var imgLi = document.getElementsByClassName("img-li");
+
+    var imgW = document.documentElement.offsetWidth;
+
+    //    alert(imgW);
+    var indexLi = document.getElementsByClassName("indexLi");
+    var imgInfo = document.getElementsByClassName("img-info-li")[0];
+    var img = document.getElementsByClassName("banner-img");
+    var index = 0;
+    imgList.style.width = imgW*5 +"px";
+    for(var i =0;i<imgLi.length;i++){
+        imgLi[i].style.width = imgW+"px";
+        imgLi[i].style.transition = "all 1s linear";
+    }
+   var animateBanner = animateBanner = setInterval(function(){
+       if(index<=4){
+           index++;
+           move(index,imgW);
+
+       }else{
+           index =0;
+       }
+
+   },2000);
+    function move(index,imgW){
+        //img
+        var imgList = document.getElementsByClassName("imgList")[0];
+//        goLeft(imgList,imgW *(index-1) )
+        imgList.style.left = -imgW *(index-1) +"px";
+        for(var i =0;i<indexLi.length;i++){
+            indexLi[i].classList.remove("indexOn");
+        }
+        indexLi[index-1].classList.add("indexOn");
+
+        //img info
+        var info = img[index-1].getAttribute("alt");
+        imgInfo.innerHTML = info;
+
+    }
+
+    document.getElementById("prev").onclick = function(){
+        clearInterval(animateBanner);
+        if(index>1){
+            index =index-2;
+        }else if(index == 1){
+            index = 4;
+        }
+        animateBanner = setInterval(function(){
+            if(index<=4){
+                index++;
+                move(index,imgW);
+
+            }else{
+            index =0;
+            }
+
+        },2000);
+    }
+    //图片组相对原始左移dist px距离
+    function goLeft(elem,dist,imgW){
+        if(dist == imgW){ //第一次时设置left为0px 或者直接使用内嵌法 style="left:0;"
+            elem.style.left = "0px";
+        }
+        var toLeft; //判断图片移动方向是否为左
+        dist = dist + parseInt(elem.style.left); //图片组相对当前移动距离
+        if(dist<0){
+            toLeft = false;
+            dist = Math.abs(dist);
+        }else{
+            toLeft = true;
+        }
+        for(var i=0;i<= dist/20;i++){ //这里设定缓慢移动，10阶每阶40px
+            (function(_i){
+                var pos = parseInt(elem.style.left); //获取当前left
+                setTimeout(function(){
+                    pos += (toLeft)? -(_i * 20) : (_i * 20); //根据toLeft值指定图片组位置改变
+                    //console.log(pos);
+                    elem.style.left = pos + "px";
+                },_i * 25); //每阶间隔50毫秒
+            })(i);
+        }
+    }
+
+</script>
+</body>
+</html>
